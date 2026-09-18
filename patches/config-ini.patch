@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/src/config-file.js
-@@ -0,0 +1,178 @@
+@@ -0,0 +1,179 @@
 +'use strict';
 +
 +/*
@@ -61,11 +61,11 @@
 +	'joox =',
 +	'',
 +	'[env]',
-+	'; 有就填，没有留空；行尾分号后面是说明',
-+	'; 无损音质',
-+	'ENABLE_FLAC =  ;填 true 开启',
-+	'; 本地黑胶 VIP',
-+	'ENABLE_LOCAL_VIP =  ;true/cvip/svip',
++	'; 有就填，没有留空',
++	'; 无损音质，填 true 开启',
++	'ENABLE_FLAC =',
++	'; 本地黑胶 VIP：true/cvip/svip',
++	'ENABLE_LOCAL_VIP =',
 +	'; 仅这些 UID 生效，逗号分隔，空=全部用户',
 +	'LOCAL_VIP_UID =',
 +	'; Netease HTTPDNS（不建议开）',
@@ -98,9 +98,10 @@
 +	'QQ_COOKIE =',
 +	'; YouTube Data API v3 Key',
 +	'YOUTUBE_KEY =',
-+	'; 自定义证书/密钥文件',
-+	'SIGN_CERT =  ;如 ./server.crt',
-+	'SIGN_KEY =  ;如 ./server.key',
++	'; 自定义证书文件，如 ./server.crt',
++	'SIGN_CERT =',
++	'; 自定义密钥文件，如 ./server.key',
++	'SIGN_KEY =',
 +	'; 搜索携带专辑名',
 +	'SEARCH_ALBUM =',
 +	'; 网易云 Cookie，如 MUSIC_U=..',

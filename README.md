@@ -28,11 +28,11 @@ migu =
 joox =
 
 [env]
-ENABLE_FLAC =  ;填 true 开启无损
-ENABLE_LOCAL_VIP =  ;true/cvip/svip
-MIN_BR =  ;如 320000
-LOG_LEVEL =  ;如 debug
-;其余见自动生成的 config.ini，行尾分号后面是说明
+ENABLE_FLAC =
+ENABLE_LOCAL_VIP =
+MIN_BR =
+LOG_LEVEL =
+;其余见自动生成的 config.ini
 ```
 
 - 默认只开免 cookie 的 5 路；`migu/qq/joox` 要 cookie 的自己填
