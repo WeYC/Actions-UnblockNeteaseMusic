@@ -33,16 +33,6 @@ jobs:
           git merge --no-edit pr-1754
           git log --oneline -5
 
-      - name: Checkout builder scripts
-        uses: actions/checkout@v7
-        with:
-          path: .builder
-
-      - name: Download yt-dlp
-        run: |
-          curl -L --retry 3 https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe -o .builder/wrapper/yt-dlp.exe
-          ls -la .builder/wrapper/
-
       - name: Use Node.js 20
         uses: actions/setup-node@v7
         with:
@@ -63,13 +53,6 @@ jobs:
           npx pkg --compress Brotli -t node18-${{ matrix.target }} .
           mv "$(ls dist/*)" "$(ls dist/* | sed 's/server/unblockneteasemusic-${{ matrix.target }}/g')"
           echo "ASSET_NAME=$(ls dist)" >> $GITHUB_ENV
-
-      - name: Build single-file wrapper
-        run: |
-          cp ./dist/* .builder/wrapper/app.exe
-          npx pkg .builder/wrapper -t node18-${{ matrix.target }} --out-path .builder/wrapper/dist-out
-          mv .builder/wrapper/dist-out/* ./dist/unblockneteasemusic-${{ matrix.target }}-single.exe
-          ls dist/
 
       - name: Publishing to GitHub Artifacts
         uses: actions/upload-artifact@v7
