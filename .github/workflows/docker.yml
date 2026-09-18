@@ -11,6 +11,7 @@ on:
 
 env:
   image: ghcr.io/weyc/unblockneteasemusic
+  image_hub: weycovo/unblockneteasemusic
 
 jobs:
   build-and-push:
@@ -45,6 +46,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Pin Node base for arm/v7
         run: |
           sed -i 's|^FROM node:lts-alpine|FROM node:22-alpine3.21|' Dockerfile
@@ -59,5 +66,20 @@ jobs:
           tags: |
             ${{ env.image }}:latest
             ${{ env.image }}:${{ inputs.tag }}
+            ${{ env.image_hub }}:latest
+            ${{ env.image_hub }}:${{ inputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Checkout builder files
+        uses: actions/checkout@v7
+        with:
+          path: .builder
+
+      - name: Sync README to Docker Hub
+        uses: peter-evans/dockerhub-description@v5
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: weycovo/unblockneteasemusic
+          readme-filepath: .builder/README.md

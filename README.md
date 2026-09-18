@@ -36,7 +36,8 @@ LOG_LEVEL =
 
 ```sh
 docker pull ghcr.io/weyc/unblockneteasemusic:0.28.1
-docker run -d -p 8080:8080 -p 8081:8081 ghcr.io/weyc/unblockneteasemusic:0.28.1
+docker pull weycovo/unblockneteasemusic:0.28.1
+docker run -d -p 8080:8080 -p 8081:8081 weycovo/unblockneteasemusic:0.28.1
 ```
 
 ## 说明
