@@ -45,11 +45,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Pin Node base for arm/v7
+        run: |
+          sed -i 's|^FROM node:lts-alpine|FROM node:22-alpine3.21|' Dockerfile
+          head -1 Dockerfile
+
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7
           push: true
           tags: |
             ${{ env.image }}:latest
