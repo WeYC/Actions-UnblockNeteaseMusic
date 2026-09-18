@@ -1,4 +1,5 @@
-# Actions-UnblockNeteaseMusic
+# UnblockNeteaseMusic
+解锁网易云音乐客户端变灰歌曲
 
 - 上游官方仓库：https://github.com/UnblockNeteaseMusic/server
 - 上游 PR（构建时自动合并）：https://github.com/UnblockNeteaseMusic/server/pull/1754
