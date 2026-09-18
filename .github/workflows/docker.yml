@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "镜像标签 e.g. latest"
+        description: "版本号 Version e.g. 0.28.*"
         required: false
-        default: "latest"
+        default: "0.28.1"
         type: string
 
 env:
@@ -51,4 +51,6 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7
           push: true
-          tags: ${{ env.image }}:${{ inputs.tag }}
+          tags: |
+            ${{ env.image }}:latest
+            ${{ env.image }}:${{ inputs.tag }}
