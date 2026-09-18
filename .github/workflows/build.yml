@@ -1,0 +1,59 @@
+name: Build Actions-UnblockNeteaseMusic
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag 名，为空则只上传 Artifact，不发布到 Release"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        target: ["win-x64"]
+      fail-fast: false
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          repository: UnblockNeteaseMusic/server
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Make bundle
+        run: yarn build
+
+      - name: Building executable file for ${{ matrix.target }}
+        run: |
+          npx pkg --compress Brotli -t node18-${{ matrix.target }} .
+          mv "$(ls dist/*)" "$(ls dist/* | sed 's/server/unblockneteasemusic-${{ matrix.target }}/g')"
+          echo "ASSET_NAME=$(ls dist)" >> $GITHUB_ENV
+
+      - name: Publishing to GitHub Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ASSET_NAME }}
+          path: ./dist/*
+
+      - name: Publishing to GitHub Releases
+        if: inputs.tag != ''
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.tag }}
+          files: dist/*
