@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag 名，为空则只上传 Artifact，不发布到 Release"
+        description: "版本号 Version e g 0.28.*"
         required: false
-        default: ""
+        default: "0.28.1"
         type: string
 
 jobs:
