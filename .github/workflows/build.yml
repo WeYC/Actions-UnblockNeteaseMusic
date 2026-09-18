@@ -54,6 +54,27 @@ jobs:
           mv "$(ls dist/*)" "$(ls dist/* | sed 's/server/unblockneteasemusic-${{ matrix.target }}/g')"
           echo "ASSET_NAME=$(ls dist)" >> $GITHUB_ENV
 
+      - name: Generate start.bat
+        run: |
+          cat > ./dist/start.bat <<EOF
+          @echo off
+          rem ============================================================
+          rem  UnblockNeteaseMusic 启动脚本（CI 自动生成，记事本可直接改）
+          rem  -o 后面是音源顺序，默认只开免 cookie、大陆可用的 6 路
+          rem  有 cookie 就填在对应等号后面，没有留空
+          rem ============================================================
+          rem QQ 音乐 cookie：uin=你的uin; qm_keyst=你的qm_keyst
+          set QQ_COOKIE=
+          rem 咪咕 cookie：你的aversionid
+          set MIGU_COOKIE=
+          rem JOOX cookie：wmid=你的wmid; session_key=你的session_key（仅港澳台泰马印尼）
+          set JOOX_COOKIE=
+          ${ASSET_NAME} -o kugou bodian kuwo bilibili bilivideo pyncmd -e https://music.163.com
+          pause
+          EOF
+          sed -i 's/$/\r/' ./dist/start.bat
+          ls dist/
+
       - name: Publishing to GitHub Artifacts
         uses: actions/upload-artifact@v7
         with:
