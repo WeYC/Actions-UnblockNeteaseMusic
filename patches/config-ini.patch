@@ -1,11 +1,11 @@
 --- /dev/null
 +++ b/src/config-file.js
-@@ -0,0 +1,98 @@
+@@ -0,0 +1,178 @@
 +'use strict';
 +
 +/*
 + * 启动配置：exe 同目录找不到 config.ini 就就地生成一份默认的，
-+ * 找到就按 [source] order（-o 默认值，命令行优先）、[cookie]（缺失的环境变量才补）加载。
++ * 找到就按 [source] order（-o 默认值，命令行优先）、[cookie]/[env]（缺失的环境变量才补）加载。
 + * 配置缺失或损坏时静默回退默认行为，不影响启动。
 + */
 +
@@ -18,6 +18,30 @@
 +	migu: 'MIGU_COOKIE',
 +	joox: 'JOOX_COOKIE',
 +};
++const ENV_KEYS = new Set([
++	'ENABLE_FLAC',
++	'ENABLE_LOCAL_VIP',
++	'LOCAL_VIP_UID',
++	'ENABLE_HTTPDNS',
++	'BLOCK_ADS',
++	'DISABLE_UPGRADE_CHECK',
++	'DEVELOPMENT',
++	'FOLLOW_SOURCE_ORDER',
++	'JSON_LOG',
++	'NO_CACHE',
++	'MIN_BR',
++	'SELECT_MAX_BR',
++	'LOG_LEVEL',
++	'LOG_FILE',
++	'JOOX_COOKIE',
++	'MIGU_COOKIE',
++	'QQ_COOKIE',
++	'YOUTUBE_KEY',
++	'SIGN_CERT',
++	'SIGN_KEY',
++	'SEARCH_ALBUM',
++	'NETEASE_COOKIE',
++]);
 +
 +const DEFAULT_CONFIG = [
 +	'; UnblockNeteaseMusic 配置文件（首次启动自动生成）',
@@ -36,6 +60,52 @@
 +	'; JOOX：wmid=你的wmid; session_key=你的session_key（仅港澳台泰马印尼）',
 +	'joox =',
 +	'',
++	'[env]',
++	'; 有就填，没有留空；行尾分号后面是说明',
++	'; 无损音质',
++	'ENABLE_FLAC =  ;填 true 开启',
++	'; 本地黑胶 VIP',
++	'ENABLE_LOCAL_VIP =  ;true/cvip/svip',
++	'; 仅这些 UID 生效，逗号分隔，空=全部用户',
++	'LOCAL_VIP_UID =',
++	'; Netease HTTPDNS（不建议开）',
++	'ENABLE_HTTPDNS =',
++	'; 屏蔽应用内部分广告',
++	'BLOCK_ADS =',
++	'; 禁用更新检测',
++	'DISABLE_UPGRADE_CHECK =',
++	'; 开发模式，需自装依赖',
++	'DEVELOPMENT =',
++	'; 严格按音源顺序查询',
++	'FOLLOW_SOURCE_ORDER =',
++	'; JSON 日志格式',
++	'JSON_LOG =',
++	'; 停用缓存',
++	'NO_CACHE =',
++	'; 最低源音质，如 320000',
++	'MIN_BR =',
++	'; 选最高码率替换',
++	'SELECT_MAX_BR =',
++	'; 日志等级，如 debug',
++	'LOG_LEVEL =',
++	'; 日志文件位置，如 app.log',
++	'LOG_FILE =',
++	'; JOOX：wmid=..; session_key=..',
++	'JOOX_COOKIE =',
++	'; 咪咕 aversionid',
++	'MIGU_COOKIE =',
++	'; QQ：uin=..; qm_keyst=..',
++	'QQ_COOKIE =',
++	'; YouTube Data API v3 Key',
++	'YOUTUBE_KEY =',
++	'; 自定义证书/密钥文件',
++	'SIGN_CERT =  ;如 ./server.crt',
++	'SIGN_KEY =  ;如 ./server.key',
++	'; 搜索携带专辑名',
++	'SEARCH_ALBUM =',
++	'; 网易云 Cookie，如 MUSIC_U=..',
++	'NETEASE_COOKIE =',
++	'',
 +].join('\r\n');
 +
 +function candidateDirs() {
@@ -49,9 +119,17 @@
 +	return [...new Set(dirs)].filter(Boolean);
 +}
 +
-+function unquote(value) {
-+	const m = value.match(/^(['"])(.*)\1$/);
-+	return m ? m[2] : value;
++function cleanValue(raw) {
++	let value = raw.trim();
++	if (!value || value[0] === ';') return '';
++	const quote = value[0];
++	if ((quote === '"' || quote === "'") && value.length > 1) {
++		const end = value.indexOf(quote, 1);
++		return end > 0 ? value.slice(1, end) : value.slice(1);
++	}
++	const cut = value.search(/\s+;/);
++	if (cut >= 0) value = value.slice(0, cut);
++	return value.trim();
 +}
 +
 +function parseIni(text) {
@@ -68,13 +146,15 @@
 +		const eq = line.indexOf('=');
 +		if (eq < 0) continue;
 +		const key = line.slice(0, eq).trim().toLowerCase();
-+		const value = unquote(line.slice(eq + 1).trim());
++		const value = cleanValue(line.slice(eq + 1));
 +		if (!value) continue;
 +		if (section === 'source' && key === 'order') {
 +			out.order = value.split(/[\s,;]+/).filter(Boolean);
 +		} else if (section === 'cookie' && key in COOKIE_KEYS) {
 +			out.env[COOKIE_KEYS[key]] = value;
-+		} else if (section === 'cookie' && Object.values(COOKIE_KEYS).includes(key.toUpperCase())) {
++		} else if (section === 'cookie' && ENV_KEYS.has(key.toUpperCase())) {
++			out.env[key.toUpperCase()] = value;
++		} else if (section === 'env' && ENV_KEYS.has(key.toUpperCase())) {
 +			out.env[key.toUpperCase()] = value;
 +		}
 +	}
