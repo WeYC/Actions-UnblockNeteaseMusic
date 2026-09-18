@@ -9,10 +9,6 @@
 - 首次运行自动生成 `config.ini` 并自动读取
 - 默认开启免 `cookie` 的音源
 
-## 用法
-
-- 下载 `exe` 双击运行
-
 ## config.ini
 
 ```ini
@@ -32,10 +28,8 @@ LOG_LEVEL =
 ;其余见自动生成的 config.ini
 ```
 
-- 默认只开免 cookie 的 5 路；`migu/qq/joox` 要 cookie 的自己填
+- 默认只开免 cookie 的 音源
 - 命令行 `-o` 优先于文件；`[env]` 对应上游环境变量表，真实环境变量优先于文件
-- `pyncmd` 实测可用但默认关闭（跟随官方，避免给第三方服务器添压），需要自己加到 `order` 里
-- `youtube` 系（`youtube/youtubedl/ytdlp`）要非大陆 IP，大陆机器不要开
 
 ## Docker
 
