@@ -11,7 +11,6 @@
 - 紧跟上游：基于官方 `enhanced` 分支，含 `PR #1754` 的新客户端 `xeapi` 适配
 - 零配置启动：首次运行自动生成中文注释的 `config.ini`，记事本直接改
 - 默认开启免 `cookie` 的音源
-- 一键发版：填版本号自动传 `Artifact` 并发到 `Release`
 - 多架构镜像：`amd64/arm64/armv6/armv7` 推到 `GHCR`，`latest` 加版本号双标签
 
 ## 用法
@@ -36,19 +35,12 @@ joox =
 - 命令行 `-o` 优先于文件；`pyncmd` 实测可用但默认关闭（跟随官方，避免给第三方服务器添压），需要自己加到 `order` 里
 - `youtube` 系（`youtube/youtubedl/ytdlp`）要非大陆 IP，大陆机器不要开
 
-## Docker 镜像
-
-1. 打开 `Actions` → `Build Docker Image` → `Run workflow`
-2. `tag` 输入框：版本号，默认 `0.28.1`，每次构建同时打 `latest` 和版本号两个标签
-3. 拉取运行：
+## Docker
 
 ```sh
 docker pull ghcr.io/weyc/unblockneteasemusic:0.28.1
 docker run -d -p 8080:8080 -p 8081:8081 ghcr.io/weyc/unblockneteasemusic:0.28.1
 ```
-
-- 基底钉在 `node:22-alpine3.21`（`lts-alpine` 已砍掉 32 位 `arm`，上游 `Dockerfile` 其余不动）
-- `GHCR` 包默认私有，拉之前改公开或 `docker login ghcr.io`
 
 ## 说明
 
