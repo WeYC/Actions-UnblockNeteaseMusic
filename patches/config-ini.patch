@@ -1,0 +1,110 @@
+--- /dev/null
++++ b/src/config-file.js
+@@ -0,0 +1,80 @@
++'use strict';
++
++/*
++ * 启动时自动检索配置文件。
++ * 查找顺序：exe 同目录的 config.ini，找不到再找当前工作目录的。
++ * [source] order 作为 -o 的默认值（命令行 -o 优先）；
++ * [cookie] 的值在真实环境变量缺失时补上（必须在 provider require 之前生效）。
++ */
++
++const fs = require('fs');
++const path = require('path');
++
++const FILE_NAME = 'config.ini';
++const COOKIE_KEYS = {
++	qq: 'QQ_COOKIE',
++	migu: 'MIGU_COOKIE',
++	joox: 'JOOX_COOKIE',
++};
++
++function findConfig() {
++	const dirs = [];
++	try {
++		dirs.push(path.dirname(process.execPath));
++	} catch (e) {}
++	dirs.push(process.cwd());
++	const seen = new Set();
++	for (const dir of dirs) {
++		if (!dir || seen.has(dir)) continue;
++		seen.add(dir);
++		const file = path.join(dir, FILE_NAME);
++		try {
++			if (fs.statSync(file).isFile()) return file;
++		} catch (e) {}
++	}
++	return null;
++}
++
++function unquote(value) {
++	const m = value.match(/^(['"])(.*)\1$/);
++	return m ? m[2] : value;
++}
++
++function parseIni(text) {
++	const out = { order: [], env: {} };
++	let section = '';
++	for (const raw of text.split(/\r?\n/)) {
++		const line = raw.trim();
++		if (!line || line.startsWith(';') || line.startsWith('#')) continue;
++		const sec = line.match(/^\[(.+)\]$/);
++		if (sec) {
++			section = sec[1].trim().toLowerCase();
++			continue;
++		}
++		const eq = line.indexOf('=');
++		if (eq < 0) continue;
++		const key = line.slice(0, eq).trim().toLowerCase();
++		const value = unquote(line.slice(eq + 1).trim());
++		if (!value) continue;
++		if (section === 'source' && key === 'order') {
++			out.order = value.split(/[\s,;]+/).filter(Boolean);
++		} else if (section === 'cookie' && key in COOKIE_KEYS) {
++			out.env[COOKIE_KEYS[key]] = value;
++		} else if (section === 'cookie' && Object.values(COOKIE_KEYS).includes(key.toUpperCase())) {
++			out.env[key.toUpperCase()] = value;
++		}
++	}
++	return out;
++}
++
++function loadStartupConfig() {
++	try {
++		const file = findConfig();
++		if (!file) return { order: [], env: {} };
++		return parseIni(fs.readFileSync(file, 'utf8'));
++	} catch (e) {
++		return { order: [], env: {} };
++	}
++}
++
++module.exports = { loadStartupConfig };
+--- a/src/app.js
++++ b/src/app.js
+@@ -1,3 +1,8 @@
++const { loadStartupConfig } = require('./config-file');
++const startupConfig = loadStartupConfig();
++for (const [key, value] of Object.entries(startupConfig.env)) {
++	if (value && !(key in process.env)) process.env[key] = value;
++}
+ const packageJson = require('../package.json');
+ const config = require('./cli.js')
+ 	.program({
+@@ -67,10 +72,12 @@
+ if (config.forceHost && require('net').isIP(config.forceHost) === 0) {
+ 	console.log('Please check the server host.');
+ 	process.exit(1);
+ }
+-if (config.matchOrder) {
+-	const provider = Object.keys(require('./consts').PROVIDERS);
+-	const candidate = config.matchOrder;
++const startupOrder =
++	!config.matchOrder && startupConfig.order.length ? startupConfig.order : null;
++if (config.matchOrder || startupOrder) {
++	const provider = Object.keys(require('./consts').PROVIDERS);
++	const candidate = config.matchOrder || startupOrder;
+ 	if (candidate.some((key, index) => index != candidate.indexOf(key))) {
+ 		console.log('Please check the duplication in match order.');
+ 		process.exit(1);

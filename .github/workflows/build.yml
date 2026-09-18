@@ -33,6 +33,17 @@ jobs:
           git merge --no-edit pr-1754
           git log --oneline -5
 
+      - name: Checkout builder files
+        uses: actions/checkout@v7
+        with:
+          path: .builder
+
+      - name: Apply startup-config patch
+        run: |
+          git apply --verbose .builder/patches/config-ini.patch
+          node --check src/config-file.js
+          git status --short
+
       - name: Use Node.js 20
         uses: actions/setup-node@v7
         with:
@@ -54,25 +65,27 @@ jobs:
           mv "$(ls dist/*)" "$(ls dist/* | sed 's/server/unblockneteasemusic-${{ matrix.target }}/g')"
           echo "ASSET_NAME=$(ls dist)" >> $GITHUB_ENV
 
-      - name: Generate start.bat
+      # 旧方案（保留思路）：曾生成 start.bat，详见 d34b136；现改由 exe 启动时直接读 config.ini
+      - name: Generate config.ini
         run: |
-          cat > ./dist/start.bat <<EOF
-          @echo off
-          rem ============================================================
-          rem  UnblockNeteaseMusic 启动脚本（CI 自动生成，记事本可直接改）
-          rem  -o 后面是音源顺序，默认只开免 cookie、大陆可用的 6 路
-          rem  有 cookie 就填在对应等号后面，没有留空
-          rem ============================================================
-          rem QQ 音乐 cookie：uin=你的uin; qm_keyst=你的qm_keyst
-          set QQ_COOKIE=
-          rem 咪咕 cookie：你的aversionid
-          set MIGU_COOKIE=
-          rem JOOX cookie：wmid=你的wmid; session_key=你的session_key（仅港澳台泰马印尼）
-          set JOOX_COOKIE=
-          ${ASSET_NAME} -o kugou bodian kuwo bilibili bilivideo pyncmd -e https://music.163.com
-          pause
+          cat > ./dist/config.ini <<EOF
+          ; UnblockNeteaseMusic 配置文件（CI 自动生成，记事本可直接改）
+          ; 放在 exe 同目录下，启动时自动加载；命令行 -o 优先于这里
+
+          [source]
+          ; 音源顺序，默认只开免 cookie、大陆可用的 6 路
+          order = kugou bodian kuwo bilibili bilivideo pyncmd
+
+          [cookie]
+          ; 有 cookie 就填等号后面，没有留空
+          ; QQ 音乐：uin=你的uin; qm_keyst=你的qm_keyst
+          qq =
+          ; 咪咕：你的aversionid
+          migu =
+          ; JOOX：wmid=你的wmid; session_key=你的session_key（仅港澳台泰马印尼）
+          joox =
           EOF
-          sed -i 's/$/\r/' ./dist/start.bat
+          sed -i 's/$/\r/' ./dist/config.ini
           ls dist/
 
       - name: Publishing to GitHub Artifacts
