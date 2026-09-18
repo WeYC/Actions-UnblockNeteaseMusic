@@ -10,7 +10,7 @@ on:
         type: string
 
 env:
-  image: ghcr.io/weyc/actions-unblockneteasemusic
+  image: ghcr.io/weyc/unblockneteasemusic
 
 jobs:
   build-and-push:

@@ -43,8 +43,8 @@ joox =
 3. 拉取运行：
 
 ```sh
-docker pull ghcr.io/weyc/actions-unblockneteasemusic:0.28.1
-docker run -d -p 8080:8080 -p 8081:8081 ghcr.io/weyc/actions-unblockneteasemusic:0.28.1
+docker pull ghcr.io/weyc/unblockneteasemusic:0.28.1
+docker run -d -p 8080:8080 -p 8081:8081 ghcr.io/weyc/unblockneteasemusic:0.28.1
 ```
 
 - 基底钉在 `node:22-alpine3.21`（`lts-alpine` 已砍掉 32 位 `arm`，上游 `Dockerfile` 其余不动）
