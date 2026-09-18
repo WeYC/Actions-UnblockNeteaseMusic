@@ -68,8 +68,6 @@ jobs:
       # 配置文件改由 exe 首次启动时就地自动生成，不再随包发布（旧生成步骤见 6a83d35）
 
       - name: Publishing to GitHub Artifacts
-
-      - name: Publishing to GitHub Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ASSET_NAME }}
