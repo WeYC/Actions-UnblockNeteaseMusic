@@ -1,0 +1,16 @@
+{
+	"name": "unm-single-wrapper",
+	"version": "1.0.0",
+	"private": true,
+	"bin": "loader.js",
+	"pkg": {
+		"assets": [
+			"app.exe",
+			"yt-dlp.exe"
+		],
+		"targets": [
+			"node18-win-x64"
+		],
+		"outputPath": "dist"
+	}
+}
