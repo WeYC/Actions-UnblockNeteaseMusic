@@ -1,13 +1,12 @@
 --- /dev/null
 +++ b/src/config-file.js
-@@ -0,0 +1,80 @@
+@@ -0,0 +1,98 @@
 +'use strict';
 +
 +/*
-+ * 启动时自动检索配置文件。
-+ * 查找顺序：exe 同目录的 config.ini，找不到再找当前工作目录的。
-+ * [source] order 作为 -o 的默认值（命令行 -o 优先）；
-+ * [cookie] 的值在真实环境变量缺失时补上（必须在 provider require 之前生效）。
++ * 启动配置：exe 同目录找不到 config.ini 就就地生成一份默认的，
++ * 找到就按 [source] order（-o 默认值，命令行优先）、[cookie]（缺失的环境变量才补）加载。
++ * 配置缺失或损坏时静默回退默认行为，不影响启动。
 + */
 +
 +const fs = require('fs');
@@ -20,22 +19,34 @@
 +	joox: 'JOOX_COOKIE',
 +};
 +
-+function findConfig() {
++const DEFAULT_CONFIG = [
++	'; UnblockNeteaseMusic 配置文件（首次启动自动生成，记事本可直接改）',
++	'; 放在 exe 同目录下，启动时自动加载；命令行 -o 优先于这里',
++	'',
++	'[source]',
++	'; 音源顺序，默认只开免 cookie、大陆可用的 6 路',
++	'order = kugou bodian kuwo bilibili bilivideo pyncmd',
++	'',
++	'[cookie]',
++	'; 有 cookie 就填等号后面，没有留空',
++	'; QQ 音乐：uin=你的uin; qm_keyst=你的qm_keyst',
++	'qq =',
++	'; 咪咕：你的aversionid',
++	'migu =',
++	'; JOOX：wmid=你的wmid; session_key=你的session_key（仅港澳台泰马印尼）',
++	'joox =',
++	'',
++].join('\r\n');
++
++function candidateDirs() {
 +	const dirs = [];
 +	try {
 +		dirs.push(path.dirname(process.execPath));
 +	} catch (e) {}
-+	dirs.push(process.cwd());
-+	const seen = new Set();
-+	for (const dir of dirs) {
-+		if (!dir || seen.has(dir)) continue;
-+		seen.add(dir);
-+		const file = path.join(dir, FILE_NAME);
-+		try {
-+			if (fs.statSync(file).isFile()) return file;
-+		} catch (e) {}
-+	}
-+	return null;
++	try {
++		dirs.push(process.cwd());
++	} catch (e) {}
++	return [...new Set(dirs)].filter(Boolean);
 +}
 +
 +function unquote(value) {
@@ -71,13 +82,20 @@
 +}
 +
 +function loadStartupConfig() {
-+	try {
-+		const file = findConfig();
-+		if (!file) return { order: [], env: {} };
-+		return parseIni(fs.readFileSync(file, 'utf8'));
-+	} catch (e) {
-+		return { order: [], env: {} };
++	for (const dir of candidateDirs()) {
++		const file = path.join(dir, FILE_NAME);
++		try {
++			if (fs.statSync(file).isFile()) return parseIni(fs.readFileSync(file, 'utf8'));
++		} catch (e) {}
 +	}
++	for (const dir of candidateDirs()) {
++		try {
++			const file = path.join(dir, FILE_NAME);
++			if (!fs.existsSync(file)) fs.writeFileSync(file, DEFAULT_CONFIG);
++			return parseIni(DEFAULT_CONFIG);
++		} catch (e) {}
++	}
++	return { order: [], env: {} };
 +}
 +
 +module.exports = { loadStartupConfig };

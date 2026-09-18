@@ -65,28 +65,9 @@ jobs:
           mv "$(ls dist/*)" "$(ls dist/* | sed 's/server/unblockneteasemusic-${{ matrix.target }}/g')"
           echo "ASSET_NAME=$(ls dist)" >> $GITHUB_ENV
 
-      # 旧方案（保留思路）：曾生成 start.bat，详见 d34b136；现改由 exe 启动时直接读 config.ini
-      - name: Generate config.ini
-        run: |
-          cat > ./dist/config.ini <<EOF
-          ; UnblockNeteaseMusic 配置文件（CI 自动生成，记事本可直接改）
-          ; 放在 exe 同目录下，启动时自动加载；命令行 -o 优先于这里
+      # 配置文件改由 exe 首次启动时就地自动生成，不再随包发布（旧生成步骤见 6a83d35）
 
-          [source]
-          ; 音源顺序，默认只开免 cookie、大陆可用的 6 路
-          order = kugou bodian kuwo bilibili bilivideo pyncmd
-
-          [cookie]
-          ; 有 cookie 就填等号后面，没有留空
-          ; QQ 音乐：uin=你的uin; qm_keyst=你的qm_keyst
-          qq =
-          ; 咪咕：你的aversionid
-          migu =
-          ; JOOX：wmid=你的wmid; session_key=你的session_key（仅港澳台泰马印尼）
-          joox =
-          EOF
-          sed -i 's/$/\r/' ./dist/config.ini
-          ls dist/
+      - name: Publishing to GitHub Artifacts
 
       - name: Publishing to GitHub Artifacts
         uses: actions/upload-artifact@v7
