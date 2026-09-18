@@ -79,3 +79,11 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           files: dist/*
+          body: |
+            基于上游 UnblockNeteaseMusic/server enhanced（含 PR #1754 新客户端 xeapi 适配）构建的 win-x64 单文件。
+
+            上游官方仓库：https://github.com/UnblockNeteaseMusic/server
+
+            用法：下载 exe 双击运行，同目录会自动生成 config.ini，记事本直接改，改完重启生效。
+
+            默认音源（免 cookie）：kugou bodian kuwo bilibili bilivideo；pyncmd 实测可用但默认关闭，需要自己加到 order 里；youtube 系要非大陆 IP，大陆机器不要开。
