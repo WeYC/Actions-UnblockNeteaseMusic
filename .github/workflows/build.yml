@@ -20,9 +20,18 @@ jobs:
       contents: write
     steps:
       - name: Checkout
+        # 旧配置（保留）：未指定 ref（默认分支）、fetch-depth 默认 1
         uses: actions/checkout@v7
         with:
           repository: UnblockNeteaseMusic/server
+          ref: enhanced
+          fetch-depth: 0
+
+      - name: Merge PR #1754
+        run: |
+          git fetch origin pull/1754/head:pr-1754
+          git merge --no-edit pr-1754
+          git log --oneline -5
 
       - name: Use Node.js 20
         uses: actions/setup-node@v7
