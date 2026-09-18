@@ -20,7 +20,7 @@
 +};
 +
 +const DEFAULT_CONFIG = [
-+	'; UnblockNeteaseMusic 配置文件（首次启动自动生成，记事本可直接改）',
++	'; UnblockNeteaseMusic 配置文件（首次启动自动生成）',
 +	'; 放在 exe 同目录下，启动时自动加载；命令行 -o 优先于这里',
 +	'',
 +	'[source]',
