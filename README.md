@@ -38,4 +38,3 @@ joox =
 ## 说明
 
 - 当前只编 `win-x64`
-- `Action` 版本跟随上游写法（`checkout/setup-node/upload-artifact v7` 等）

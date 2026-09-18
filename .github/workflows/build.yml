@@ -86,4 +86,4 @@ jobs:
 
             用法：下载 exe 双击运行，同目录会自动生成 config.ini，记事本直接改，改完重启生效。
 
-            默认音源（免 cookie）：kugou bodian kuwo bilibili bilivideo；pyncmd 实测可用但默认关闭，需要自己加到 order 里；youtube 系要非大陆 IP，大陆机器不要开。
+            默认音源（免 cookie）：kugou bodian kuwo bilibili bilivideo。
