@@ -44,8 +44,14 @@ joox =
 
 ```sh
 docker pull ghcr.io/weyc/unblockneteasemusic:0.28.1
-docker run -d -p 8080:8080 -p 8081:8081 ghcr.io/weyc/unblockneteasemusic:0.28.1
+docker run -d -p 8080:8080 -p 8081:8081 \
+  -e QQ_COOKIE="uin=你的uin; qm_keyst=你的qm_keyst" \
+  -e MIGU_COOKIE="你的aversionid" \
+  -e JOOX_COOKIE="wmid=你的wmid; session_key=你的session_key" \
+  ghcr.io/weyc/unblockneteasemusic:0.28.1
 ```
+
+- `cookie` 没有就不写对应 `-e` 行；含义同 `config.ini`（`migu/qq/joox`，`joox` 仅港澳台泰马印尼）
 
 - 基底钉在 `node:22-alpine3.21`（`lts-alpine` 已砍掉 32 位 `arm`，上游 `Dockerfile` 其余不动）
 - `GHCR` 包默认私有，拉之前改公开或 `docker login ghcr.io`
