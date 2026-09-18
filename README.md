@@ -5,14 +5,13 @@
 
 ## 特性
 
-- 开箱即用：单个 `win-x64` 可执行文件，不依赖 `Node.js`
 - 紧跟上游：基于官方 `enhanced` 分支，含 `PR #1754` 的新客户端 `xeapi` 适配
 - 首次运行自动生成 `config.ini` 并自动读取
 - 默认开启免 `cookie` 的音源
 
 ## 用法
 
-- 下载 `exe` 双击运行，同目录会自动生成 `config.ini`
+- 下载 `exe` 双击运行
 
 ## config.ini
 
