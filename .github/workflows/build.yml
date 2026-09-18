@@ -1,4 +1,4 @@
-name: Build Actions-UnblockNeteaseMusic
+name: Build
 
 on:
   workflow_dispatch:

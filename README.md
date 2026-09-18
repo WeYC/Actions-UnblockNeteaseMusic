@@ -12,7 +12,7 @@
 
 ## 用法
 
-1. 打开 `Actions` → `Build Actions-UnblockNeteaseMusic` → `Run workflow`
+1. 打开 `Actions` → `Build` → `Run workflow`
 2. `tag` 输入框：版本号，默认 `0.28.1`，留空则只传 `Artifact` 不发版
 3. 下载 `exe` 双击运行，同目录会自动生成 `config.ini`，记事本直接改，改完重启生效
 
