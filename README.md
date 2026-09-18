@@ -5,12 +5,13 @@
 - 上游官方仓库：https://github.com/UnblockNeteaseMusic/server
 - 上游 PR（构建时自动合并）：https://github.com/UnblockNeteaseMusic/server/pull/1754
 
-## 做了什么
+## 特性
 
-- 拉取上游 `enhanced` 分支，合并 `PR #1754`（新客户端 `xeapi` 加密适配 + 本地 VIP 图标补全）
-- 打启动补丁（`patches/config-ini.patch`）：`exe` 首次启动时在同目录自动生成 `config.ini`
-- `yarn build`（webpack）→ `pkg --compress Brotli -t node18-win-x64` 编译
-- 产物上传 `Artifact`，填了版本号就同时发到 `Release`
+- 开箱即用：单个 `win-x64` 可执行文件，不依赖 `Node.js`
+- 紧跟上游：基于官方 `enhanced` 分支，含 `PR #1754` 的新客户端 `xeapi` 适配
+- 零配置启动：首次运行自动生成中文注释的 `config.ini`，记事本直接改
+- 大陆优化默认：只开免 `cookie`、大陆可用的 6 路音源
+- 一键发版：填版本号自动传 `Artifact` 并发到 `Release`
 
 ## 用法
 
