@@ -7,14 +7,12 @@
 
 - 开箱即用：单个 `win-x64` 可执行文件，不依赖 `Node.js`
 - 紧跟上游：基于官方 `enhanced` 分支，含 `PR #1754` 的新客户端 `xeapi` 适配
-- 首次运行自动生成`config.ini`配置文件，运行自动读取
+- 首次运行自动生成 `config.ini` 并自动读取
 - 默认开启免 `cookie` 的音源
 
 ## 用法
 
-1. 打开 `Actions` → `Build` → `Run workflow`
-2. `tag` 输入框：版本号，默认 `0.28.1`，留空则只传 `Artifact` 不发版
-3. 下载 `exe` 双击运行，同目录会自动生成 `config.ini`，记事本直接改，改完重启生效
+- 下载 `exe` 双击运行，同目录会自动生成 `config.ini`
 
 ## config.ini
 
