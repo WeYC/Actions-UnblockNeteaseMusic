@@ -42,4 +42,3 @@ docker run -d -p 8080:8080 -p 8081:8081 weycovo/unblockneteasemusic:0.28.1
 ## 说明
 
 - **自用** 不保证稳定性
-- 可执行文件当前只编 `win-x64`，镜像覆盖 4 架构
