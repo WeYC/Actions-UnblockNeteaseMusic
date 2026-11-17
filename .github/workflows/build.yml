@@ -1,30 +1,13 @@
 name: Build
 
-# 与上游的差异：上游 enhanced 不含 xeapi 支持（PR #1754 至今未合并），
-# 而 iOS 新版客户端全部走 xeapi，不合并就会音源替换失效。
-#
-# 两条路线，用 core_repo 输入切换：
-#   WeYC/UnblockNeteaseMusic      → 用自己维护的 main（已含 PR #1754），推荐
-#   UnblockNeteaseMusic/server    → 上游 enhanced + 现场合并 PR #1754（旧路径，保留）
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "版本号 Version e.g. 0.28.1"
+        description: "版本号 Version e.g. 0.28.*"
         required: false
         default: "0.28.1"
         type: string
-      core_repo:
-        description: "core 来源仓库"
-        required: false
-        default: "WeYC/UnblockNeteaseMusic"
-        type: choice
-        options:
-          - WeYC/UnblockNeteaseMusic
-          - UnblockNeteaseMusic/server
-
-env:
-  CORE_REPO: ${{ inputs.core_repo || 'WeYC/UnblockNeteaseMusic' }}
 
 jobs:
   build:
@@ -36,28 +19,19 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout core
+      - name: Checkout
+        # 旧配置（保留）：未指定 ref（默认分支）、fetch-depth 默认 1
         uses: actions/checkout@v7
         with:
-          repository: ${{ env.CORE_REPO }}
-          ref: main
+          repository: UnblockNeteaseMusic/server
+          ref: enhanced
           fetch-depth: 0
 
-      # 只有回退到上游时才需要现场合 PR：自己的 main 已经包含这些提交。
-      - name: Merge PR #1754 (upstream only)
-        if: env.CORE_REPO == 'UnblockNeteaseMusic/server'
+      - name: Merge PR #1754
         run: |
           git fetch origin pull/1754/head:pr-1754
           git merge --no-edit pr-1754
           git log --oneline -5
-
-      - name: Verify xeapi support
-        run: |
-          if ! grep -q 'xeapi' src/hook.js; then
-            echo "::error::core 缺少 xeapi 支持，iOS 端会失效"
-            exit 1
-          fi
-          echo "xeapi 支持已就位"
 
       - name: Checkout builder files
         uses: actions/checkout@v7
@@ -76,17 +50,22 @@ jobs:
           node-version: 20
           cache: yarn
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
       - name: Install dependencies
         run: yarn
 
       - name: Make bundle
         run: yarn build
 
-      - name: Building executable file
+      - name: Building executable file for ${{ matrix.target }}
         run: |
           npx pkg --compress Brotli -t node18-${{ matrix.target }} .
           mv "$(ls dist/*)" "$(ls dist/* | sed 's/server/unblockneteasemusic-${{ matrix.target }}/g')"
           echo "ASSET_NAME=$(ls dist)" >> $GITHUB_ENV
+
+      # 配置文件改由 exe 首次启动时就地自动生成，不再随包发布（旧生成步骤见 6a83d35）
 
       - name: Publishing to GitHub Artifacts
         uses: actions/upload-artifact@v7
@@ -101,12 +80,10 @@ jobs:
           tag_name: ${{ inputs.tag }}
           files: dist/*
           body: |
-            基于 `${{ env.CORE_REPO }}` 的 main 构建的 win-x64 单文件。
-
-            包含 xeapi 适配（上游 PR #1754），iOS / 新版客户端可用。
+            基于上游 UnblockNeteaseMusic/server enhanced（含 PR #1754 新客户端 xeapi 适配）构建的 win-x64 单文件。
 
             上游官方仓库：https://github.com/UnblockNeteaseMusic/server
 
-            用法：下载 exe 双击运行，同目录会自动生成 config.ini。
+            用法：下载 exe 双击运行，同目录会自动生成 config.ini，记事本直接改，改完重启生效。
 
             默认音源（免 cookie）：kugou bodian kuwo bilibili bilivideo。
