@@ -1,17 +1,28 @@
 name: Build Docker Image
 
+# 与上游的差异：上游 enhanced 不含 xeapi 支持（PR #1754 至今未合并），
+# iOS 新版客户端全部走 xeapi，不合并则音源替换失效。
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "版本号 Version e.g. 0.28.*"
+        description: "版本号 Version e.g. 0.28.1"
         required: false
         default: "0.28.1"
         type: string
+      core_repo:
+        description: "core 来源仓库"
+        required: false
+        default: "WeYC/UnblockNeteaseMusic"
+        type: choice
+        options:
+          - WeYC/UnblockNeteaseMusic
+          - UnblockNeteaseMusic/server
 
 env:
   image: ghcr.io/weyc/unblockneteasemusic
   image_hub: weycovo/unblockneteasemusic
+  CORE_REPO: ${{ inputs.core_repo || 'WeYC/UnblockNeteaseMusic' }}
 
 jobs:
   build-and-push:
@@ -20,18 +31,28 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Checkout
+      - name: Checkout core
         uses: actions/checkout@v7
         with:
-          repository: UnblockNeteaseMusic/server
-          ref: enhanced
+          repository: ${{ env.CORE_REPO }}
+          ref: main
           fetch-depth: 0
 
-      - name: Merge PR #1754
+      # 只有回退到上游时才需要现场合 PR：自己的 main 已包含这些提交。
+      - name: Merge PR #1754 (upstream only)
+        if: env.CORE_REPO == 'UnblockNeteaseMusic/server'
         run: |
           git fetch origin pull/1754/head:pr-1754
           git merge --no-edit pr-1754
           git log --oneline -5
+
+      - name: Verify xeapi support
+        run: |
+          if ! grep -q 'xeapi' src/hook.js; then
+            echo "::error::core 缺少 xeapi 支持，iOS 端会失效"
+            exit 1
+          fi
+          echo "xeapi 支持已就位"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
